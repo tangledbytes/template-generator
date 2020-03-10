@@ -13,23 +13,24 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
 package cmd
 
 import (
 	"fmt"
 	"os"
 	"path"
-	"path/filepath"
+
+	"github.com/spf13/viper"
 
 	"github.com/spf13/cobra"
 	"github.com/utkarsh-pro/tempgen/copy"
 )
 
-var supportedLanguages = []string{"cpp", "js", "go", "py"}
-var currentPath = getCurrentPath()
 var template, name *string
 var language string
 var dir *bool
+var supportedLanguages []string
 
 // createCmd represents the create command
 var createCmd = &cobra.Command{
@@ -37,6 +38,13 @@ var createCmd = &cobra.Command{
 	Short: "create command is used to create either a file or directory by using default or a custom template",
 	Long:  `create command is used to create either a file or directory by using default or a custom template`,
 	Run: func(cmd *cobra.Command, args []string) {
+		supportedLanguages = viper.GetStringSlice("supportedLanguages")
+
+		if len(args) != 1 {
+			cmd.Help()
+			os.Exit(1)
+		}
+
 		language = args[0]
 		supported := isPresent(supportedLanguages, language)
 
@@ -55,18 +63,19 @@ var createCmd = &cobra.Command{
 		}
 
 		if *dir == false {
-			err := copy.File(path.Join(currentPath, "templates", language, "file", "main"), path.Join(wd, *name))
+			err := copy.File(path.Join(currentPath, "templates", language, "file", "main"), path.Join(wd, *name+"."+language))
 			if err != nil {
 				fmt.Println(err)
 			}
+			fmt.Println("Successfuly created " + *name + "." + language)
 		} else {
 			err := copy.Dir(path.Join(currentPath, "templates", language, "dir"), path.Join(wd, *name))
 			if err != nil {
 				fmt.Println(err)
 			}
+			fmt.Println("Successfuly created " + *name)
 		}
 
-		fmt.Println("Successfuly created " + *name)
 	},
 }
 
@@ -80,16 +89,6 @@ func isPresent(arr []string, val string) bool {
 	}
 
 	return flag
-}
-
-func getCurrentPath() string {
-	ex, err := os.Executable()
-	if err != nil {
-		panic(err)
-	}
-	exPath := filepath.Dir(ex)
-	fmt.Println(exPath)
-	return exPath
 }
 
 func init() {
@@ -107,5 +106,5 @@ func init() {
 	dir = createCmd.Flags().BoolP("directory", "d", false, "Default is false, set to true to specify if a directory is to be created")
 	template = createCmd.Flags().StringP("template", "t", "", "Set custom template, accepts local location or URL")
 	// language = createCmd.Flags().StringP("language", "l", "cpp", "Set programming language")
-	name = createCmd.Flags().StringP("name", "n", "main.cpp", "Specify name of the file")
+	name = createCmd.Flags().StringP("name", "n", "main", "Specify name of the file")
 }
