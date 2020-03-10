@@ -34,12 +34,9 @@ var rootCmd = &cobra.Command{
 	Use:   "tempgen",
 	Short: "Tempgen is CLI application which can generate files/directories from predefined templates",
 	Long: `Tempgen is CLI application which can generate 
-	files/directories from predefined templates.
+files/directories from predefined templates.
 	
-	You can set custom templates or fetch them from the internet!`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	//	Run: func(cmd *cobra.Command, args []string) { },
+You can set custom templates or fetch them from the internet!`,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -57,7 +54,6 @@ func getCurrentPath() string {
 		panic(err)
 	}
 	exPath := filepath.Dir(ex)
-	fmt.Println(exPath)
 	return exPath
 }
 

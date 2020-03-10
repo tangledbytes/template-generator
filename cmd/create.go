@@ -104,7 +104,6 @@ func init() {
 	// is called directly, e.g.:
 	// createCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	dir = createCmd.Flags().BoolP("directory", "d", false, "Default is false, set to true to specify if a directory is to be created")
-	template = createCmd.Flags().StringP("template", "t", "", "Set custom template, accepts local location or URL")
-	// language = createCmd.Flags().StringP("language", "l", "cpp", "Set programming language")
+	template = createCmd.Flags().StringP("template", "t", "", "Set custom template path")
 	name = createCmd.Flags().StringP("name", "n", "main", "Specify name of the file")
 }
