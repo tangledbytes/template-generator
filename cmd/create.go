@@ -17,12 +17,18 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"path"
+	"path/filepath"
 
 	"github.com/spf13/cobra"
+	"github.com/utkarsh-pro/tempgen/copy"
 )
 
 var supportedLanguages = []string{"cpp", "js", "go", "py"}
+var currentPath = getCurrentPath()
 var template, language, name *string
+var dir *bool
 
 // createCmd represents the create command
 var createCmd = &cobra.Command{
@@ -30,8 +36,58 @@ var createCmd = &cobra.Command{
 	Short: "create command is used to create either a file or directory by using default or a custom template",
 	Long:  `create command is used to create either a file or directory by using default or a custom template`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(*template, *name, *language)
+		supported := isPresent(supportedLanguages, *language)
+
+		if supported == false {
+			fmt.Printf("Unsupported language: '%v'\nSupported languages are:\n", *language)
+			for i, lang := range supportedLanguages {
+				fmt.Printf(" %v) %v\n", i+1, lang)
+			}
+			os.Exit(1)
+		}
+
+		wd, err := os.Getwd()
+		if err != nil {
+			fmt.Println("Couldn't read current working directory!")
+			os.Exit(1)
+		}
+
+		if *dir == false {
+			err := copy.File(path.Join(currentPath, "templates", *language, "file", "main"), path.Join(wd, *name))
+			if err != nil {
+				fmt.Println(err)
+			}
+		} else {
+			err := copy.Dir(path.Join(currentPath, "templates", *language, "dir"), path.Join(wd, *name))
+			if err != nil {
+				fmt.Println(err)
+			}
+		}
+
+		fmt.Println("Successfuly created " + *name)
 	},
+}
+
+func isPresent(arr []string, val string) bool {
+	flag := false
+	for _, el := range arr {
+		if val == el {
+			flag = true
+			break
+		}
+	}
+
+	return flag
+}
+
+func getCurrentPath() string {
+	ex, err := os.Executable()
+	if err != nil {
+		panic(err)
+	}
+	exPath := filepath.Dir(ex)
+	fmt.Println(exPath)
+	return exPath
 }
 
 func init() {
@@ -46,8 +102,8 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// createCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	createCmd.Flags().BoolP("directory", "d", false, "Default is false, set to true to specify if a directory is to be created")
-	template = createCmd.Flags().StringP("template", "t", "", "")
-	language = createCmd.Flags().StringP("language", "l", "", "")
-	name = createCmd.Flags().StringP("name", "n", "", "")
+	dir = createCmd.Flags().BoolP("directory", "d", false, "Default is false, set to true to specify if a directory is to be created")
+	template = createCmd.Flags().StringP("template", "t", "", "Set custom template, accepts local location or URL")
+	language = createCmd.Flags().StringP("language", "l", "cpp", "Set programming language")
+	name = createCmd.Flags().StringP("name", "n", "main.cpp", "Specify name of the file")
 }
