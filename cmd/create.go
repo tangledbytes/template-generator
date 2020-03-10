@@ -29,7 +29,7 @@ import (
 
 var template, name *string
 var language string
-var dir *bool
+var dir, languages *bool
 var supportedLanguages []string
 
 // createCmd represents the create command
@@ -39,7 +39,6 @@ var createCmd = &cobra.Command{
 	Long:  `create command is used to create either a file or directory by using default or a custom template`,
 	Run: func(cmd *cobra.Command, args []string) {
 		supportedLanguages = viper.GetStringSlice("supportedLanguages")
-
 		if len(args) != 1 {
 			cmd.Help()
 			os.Exit(1)
@@ -48,11 +47,20 @@ var createCmd = &cobra.Command{
 		language = args[0]
 		supported := isPresent(supportedLanguages, language)
 
-		if supported == false {
-			fmt.Printf("Unsupported language: '%v'\nSupported languages are:\n", language)
+		// Don't respect the command line argument
+		if *template != "" {
+			*dir, _ = isDirectory(*template)
+		}
+
+		if supported == false || *languages == true {
+			if supported == false {
+				fmt.Printf("Unsupported language: '%v'\n", language)
+			}
+			fmt.Println("Supported languages are:")
 			for i, lang := range supportedLanguages {
 				fmt.Printf(" %v) %v\n", i+1, lang)
 			}
+			fmt.Println("Consider adding the language of your choice by using:\n  tempgen add [language]")
 			os.Exit(1)
 		}
 
@@ -63,20 +71,38 @@ var createCmd = &cobra.Command{
 		}
 
 		if *dir == false {
-			err := copy.File(path.Join(currentPath, "templates", language, "file", "main"), path.Join(wd, *name+"."+language))
-			if err != nil {
-				fmt.Println(err)
-			}
-			fmt.Println("Successfuly created " + *name + "." + language)
+			err = copy.File(getTemplatePath(), path.Join(wd, getFileName()))
 		} else {
-			err := copy.Dir(path.Join(currentPath, "templates", language, "dir"), path.Join(wd, *name))
-			if err != nil {
-				fmt.Println(err)
-			}
-			fmt.Println("Successfuly created " + *name)
+			err = copy.Dir(getTemplatePath(), path.Join(wd, getFileName()))
 		}
 
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		fmt.Println("Successfuly created " + *name)
 	},
+}
+
+func getTemplatePath() string {
+
+	if *template == "" {
+		if *dir == false {
+			return path.Join(currentPath, "templates", language, "file", "main")
+		}
+
+		return path.Join(currentPath, "templates", language, "dir")
+	}
+
+	return *template
+}
+
+func getFileName() string {
+	if *dir == false {
+		return *name + "." + language
+	}
+
+	return *name
 }
 
 func isPresent(arr []string, val string) bool {
@@ -89,6 +115,22 @@ func isPresent(arr []string, val string) bool {
 	}
 
 	return flag
+}
+
+func isDirectory(name string) (bool, error) {
+	fi, err := os.Stat(name)
+	if err != nil {
+		return false, err
+	}
+
+	switch mode := fi.Mode(); {
+	case mode.IsDir():
+		return true, nil
+	case mode.IsRegular():
+		return false, nil
+	}
+
+	return false, nil
 }
 
 func init() {
@@ -106,4 +148,5 @@ func init() {
 	dir = createCmd.Flags().BoolP("directory", "d", false, "Default is false, set to true to specify if a directory is to be created")
 	template = createCmd.Flags().StringP("template", "t", "", "Set custom template path")
 	name = createCmd.Flags().StringP("name", "n", "main", "Specify name of the file")
+	languages = createCmd.Flags().Bool("languages", false, "Set this flag to see the supported languages")
 }
