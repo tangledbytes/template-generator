@@ -27,19 +27,21 @@ import (
 
 var supportedLanguages = []string{"cpp", "js", "go", "py"}
 var currentPath = getCurrentPath()
-var template, language, name *string
+var template, name *string
+var language string
 var dir *bool
 
 // createCmd represents the create command
 var createCmd = &cobra.Command{
-	Use:   "create",
+	Use:   "create [language]",
 	Short: "create command is used to create either a file or directory by using default or a custom template",
 	Long:  `create command is used to create either a file or directory by using default or a custom template`,
 	Run: func(cmd *cobra.Command, args []string) {
-		supported := isPresent(supportedLanguages, *language)
+		language = args[0]
+		supported := isPresent(supportedLanguages, language)
 
 		if supported == false {
-			fmt.Printf("Unsupported language: '%v'\nSupported languages are:\n", *language)
+			fmt.Printf("Unsupported language: '%v'\nSupported languages are:\n", language)
 			for i, lang := range supportedLanguages {
 				fmt.Printf(" %v) %v\n", i+1, lang)
 			}
@@ -53,12 +55,12 @@ var createCmd = &cobra.Command{
 		}
 
 		if *dir == false {
-			err := copy.File(path.Join(currentPath, "templates", *language, "file", "main"), path.Join(wd, *name))
+			err := copy.File(path.Join(currentPath, "templates", language, "file", "main"), path.Join(wd, *name))
 			if err != nil {
 				fmt.Println(err)
 			}
 		} else {
-			err := copy.Dir(path.Join(currentPath, "templates", *language, "dir"), path.Join(wd, *name))
+			err := copy.Dir(path.Join(currentPath, "templates", language, "dir"), path.Join(wd, *name))
 			if err != nil {
 				fmt.Println(err)
 			}
@@ -104,6 +106,6 @@ func init() {
 	// createCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	dir = createCmd.Flags().BoolP("directory", "d", false, "Default is false, set to true to specify if a directory is to be created")
 	template = createCmd.Flags().StringP("template", "t", "", "Set custom template, accepts local location or URL")
-	language = createCmd.Flags().StringP("language", "l", "cpp", "Set programming language")
+	// language = createCmd.Flags().StringP("language", "l", "cpp", "Set programming language")
 	name = createCmd.Flags().StringP("name", "n", "main.cpp", "Specify name of the file")
 }
