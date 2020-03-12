@@ -22,9 +22,9 @@ import (
 	"path"
 
 	"github.com/spf13/viper"
+	"github.com/utkarsh-pro/tempgen/helper"
 
 	"github.com/spf13/cobra"
-	"github.com/utkarsh-pro/tempgen/copy"
 )
 
 var template, name *string
@@ -49,7 +49,7 @@ var createCmd = &cobra.Command{
 
 		// Don't respect the command line argument
 		if *template != "" {
-			*dir, _ = isDirectory(*template)
+			*dir, _ = helper.IsDirectory(*template)
 		}
 
 		if supported == false || *languages == true {
@@ -71,9 +71,9 @@ var createCmd = &cobra.Command{
 		}
 
 		if *dir == false {
-			err = copy.File(getTemplatePath(), path.Join(wd, getFileName()))
+			err = helper.CopyFile(getTemplatePath(), path.Join(wd, getFileName()))
 		} else {
-			err = copy.Dir(getTemplatePath(), path.Join(wd, getFileName()))
+			err = helper.CopyDir(getTemplatePath(), path.Join(wd, getFileName()))
 		}
 
 		if err != nil {
@@ -113,24 +113,7 @@ func isPresent(arr []string, val string) bool {
 			break
 		}
 	}
-
 	return flag
-}
-
-func isDirectory(name string) (bool, error) {
-	fi, err := os.Stat(name)
-	if err != nil {
-		return false, err
-	}
-
-	switch mode := fi.Mode(); {
-	case mode.IsDir():
-		return true, nil
-	case mode.IsRegular():
-		return false, nil
-	}
-
-	return false, nil
 }
 
 func init() {

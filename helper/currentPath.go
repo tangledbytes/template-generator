@@ -14,30 +14,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-/*
-USAGE:
-tempgen create [language] [flags]
+package helper
 
-Flags:
-	-d, --dir		If the generated file is a directory
-	-n, --name		Name of the file/directory
-	-t, --template  location/url of the template
+import (
+	"os"
+	"path/filepath"
+)
 
-tempgen setDefault [language] [flags]
-
-Flags:
-	-d, --dir		If the generated file is a directory
-	-t, --template  location/url of the template
-
-tempgen add [language] [template_location] [flags]
-
-Flags:
-	 , --default	Sets this language and mode as default
-*/
-package main
-
-import "github.com/utkarsh-pro/tempgen/cmd"
-
-func main() {
-	cmd.Execute()
+// GetCurrentPath returns the path where the binary is placed
+func GetCurrentPath() string {
+	ex, err := os.Executable()
+	if err != nil {
+		panic(err)
+	}
+	exPath := filepath.Dir(ex)
+	return exPath
 }

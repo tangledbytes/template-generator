@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package copy
+package helper
 
 import (
 	"fmt"
@@ -24,8 +24,8 @@ import (
 	"path"
 )
 
-// File copies a single file from src to dst
-func File(src, dst string) error {
+// CopyFile copies a single file from src to dst
+func CopyFile(src, dst string) error {
 	var err error
 	var srcfd *os.File
 	var dstfd *os.File
@@ -50,8 +50,8 @@ func File(src, dst string) error {
 	return os.Chmod(dst, srcinfo.Mode())
 }
 
-// Dir copies a whole directory recursively
-func Dir(src string, dst string) error {
+// CopyDir copies a whole directory recursively
+func CopyDir(src string, dst string) error {
 	var err error
 	var fds []os.FileInfo
 	var srcinfo os.FileInfo
@@ -73,11 +73,11 @@ func Dir(src string, dst string) error {
 		dstfp := path.Join(dst, fd.Name())
 
 		if fd.IsDir() {
-			if err = Dir(srcfp, dstfp); err != nil {
+			if err = CopyDir(srcfp, dstfp); err != nil {
 				fmt.Println(err)
 			}
 		} else {
-			if err = File(srcfp, dstfp); err != nil {
+			if err = CopyFile(srcfp, dstfp); err != nil {
 				fmt.Println(err)
 			}
 		}

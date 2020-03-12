@@ -14,30 +14,35 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-/*
-USAGE:
-tempgen create [language] [flags]
+package helper
 
-Flags:
-	-d, --dir		If the generated file is a directory
-	-n, --name		Name of the file/directory
-	-t, --template  location/url of the template
+import "os"
 
-tempgen setDefault [language] [flags]
+// IsDirectory checks if the given name is a file or a directory
+func IsDirectory(name string) (bool, error) {
+	fi, err := os.Stat(name)
+	if err != nil {
+		return false, err
+	}
 
-Flags:
-	-d, --dir		If the generated file is a directory
-	-t, --template  location/url of the template
+	switch mode := fi.Mode(); {
+	case mode.IsDir():
+		return true, nil
+	case mode.IsRegular():
+		return false, nil
+	}
 
-tempgen add [language] [template_location] [flags]
+	return false, nil
+}
 
-Flags:
-	 , --default	Sets this language and mode as default
-*/
-package main
-
-import "github.com/utkarsh-pro/tempgen/cmd"
-
-func main() {
-	cmd.Execute()
+// CheckDirectory checks if the directory exists or not
+func CheckDirectory(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return true, err
 }

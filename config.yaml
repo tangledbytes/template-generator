@@ -1,5 +1,9 @@
 supportedLanguages:
-    - cpp
-    - js
-    - py
-    - go
+- cpp
+- js
+- py
+- go
+- kool
+defaults:
+  language: cpp
+  mode: file

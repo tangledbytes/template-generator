@@ -19,15 +19,15 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 
 	"github.com/spf13/cobra"
+	"github.com/utkarsh-pro/tempgen/helper"
 
 	"github.com/spf13/viper"
 )
 
 var cfgFile = "config"
-var currentPath = getCurrentPath()
+var currentPath = helper.GetCurrentPath()
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -46,15 +46,6 @@ func Execute() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-}
-
-func getCurrentPath() string {
-	ex, err := os.Executable()
-	if err != nil {
-		panic(err)
-	}
-	exPath := filepath.Dir(ex)
-	return exPath
 }
 
 func init() {
