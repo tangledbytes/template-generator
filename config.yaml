@@ -3,7 +3,6 @@ supportedLanguages:
 - js
 - py
 - go
-- kool
 defaults:
   language: cpp
   mode: file

@@ -35,8 +35,8 @@ var supportedLanguages []string
 // createCmd represents the create command
 var createCmd = &cobra.Command{
 	Use:   "create [language]",
-	Short: "create command is used to create either a file or directory by using default or a custom template",
-	Long:  `create command is used to create either a file or directory by using default or a custom template`,
+	Short: "Creates either a file or directory by using default or a custom template",
+	Long:  `Creates either a file or directory by using default or a custom template`,
 	Run: func(cmd *cobra.Command, args []string) {
 		supportedLanguages = viper.GetStringSlice("supportedLanguages")
 		if len(args) != 1 {

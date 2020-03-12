@@ -17,12 +17,16 @@ limitations under the License.
 package helper
 
 import (
+	"fmt"
 	"io/ioutil"
+	"os"
 	"path"
 
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v2"
 )
+
+var cfgFile = "config"
 
 // Config struct defines the configuration
 type Config struct {
@@ -33,18 +37,20 @@ type Config struct {
 	} `yaml:"defaults"`
 }
 
-// WriteLanguageToConfig will write config to the file
-func WriteLanguageToConfig(language string) error {
-	C := &Config{}
-	cfgFile := "config"
-
+func init() {
 	viper.AddConfigPath(GetCurrentPath())
 	viper.SetConfigName(cfgFile)
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err != nil {
-		return err
+		fmt.Println(err)
+		os.Exit(1)
 	}
+}
+
+// WriteLanguageToConfig will write config to the file
+func WriteLanguageToConfig(language string) error {
+	C := &Config{}
 
 	err := viper.Unmarshal(&C)
 
@@ -53,6 +59,41 @@ func WriteLanguageToConfig(language string) error {
 	}
 
 	C.SupportedLanguages = append(C.SupportedLanguages, language)
+
+	d, err := yaml.Marshal(&C)
+
+	if err != nil {
+		return err
+	}
+
+	err = ioutil.WriteFile(path.Join(GetCurrentPath(), cfgFile+".yaml"), d, 0644)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// RemoveLanguageFromConfig will remove a language from the config
+func RemoveLanguageFromConfig(language string) error {
+	C := &Config{}
+	cfgFile := "config"
+	j := 0
+
+	err := viper.Unmarshal(&C)
+
+	if err != nil {
+		return err
+	}
+
+	for _, lang := range C.SupportedLanguages {
+		if lang != language {
+			C.SupportedLanguages[j] = lang
+			j++
+		}
+	}
+
+	C.SupportedLanguages = C.SupportedLanguages[:j]
 
 	d, err := yaml.Marshal(&C)
 
