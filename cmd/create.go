@@ -89,7 +89,7 @@ func getTemplatePath() string {
 
 	if *template == "" {
 		if *dir == false {
-			return path.Join(currentPath, "templates", language, "file", "main")
+			return path.Join(currentPath, "templates", language, "file", "main."+language)
 		}
 
 		return path.Join(currentPath, "templates", language, "dir")

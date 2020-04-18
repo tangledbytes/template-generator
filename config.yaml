@@ -3,6 +3,7 @@ supportedLanguages:
 - js
 - py
 - go
+- c
 defaults:
   language: cpp
   mode: file
